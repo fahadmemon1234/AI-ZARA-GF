@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zara - Your AI Girlfriend 💕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #1a0a12;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, #2d1020 0%, #1a0a12 100%);
+      border-radius: 24px;
+      border: 1px solid #e8527a33;
+      box-shadow: 0 20px 60px rgba(232, 82, 122, 0.2);
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 30px 25px;
+      text-align: center;
+      background: linear-gradient(180deg, #e8527a22 0%, transparent 100%);
+    }
+
+    .avatar-container {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 15px;
+      position: relative;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e8527a 0%, #c43d62 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      border: 3px solid #e8527a;
+      box-shadow: 0 0 30px rgba(232, 82, 122, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1);
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 30px rgba(232, 82, 122, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.1); }
+      50% { box-shadow: 0 0 50px rgba(232, 82, 122, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.2); }
+    }
+
+    .avatar.speaking {
+      animation: speak 0.4s ease-in-out infinite;
+    }
+
+    @keyframes speak {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 16px;
+      height: 16px;
+      background: #4ade80;
+      border: 3px solid #1a0a12;
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      color: #e8527a;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .status-text {
+      color: #4ade80;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .connection-status {
+      font-size: 12px;
+      color: #885566;
+      margin-top: 8px;
+    }
+
+    .waveform-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3px;
+      height: 50px;
+      margin: 20px 0;
+    }
+
+    .waveform-bar {
+      width: 4px;
+      height: 8px;
+      background: linear-gradient(180deg, #e8527a 0%, #c43d62 100%);
+      border-radius: 2px;
+      transition: height 0.1s ease;
+    }
+
+    .waveform-bar.active {
+      animation: waveform 0.5s ease-in-out infinite;
+    }
+
+    @keyframes waveform {
+      0%, 100% { height: 8px; }
+      50% { height: 35px; }
+    }
+
+    .waveform-bar:nth-child(1) { animation-delay: 0s; }
+    .waveform-bar:nth-child(2) { animation-delay: 0.05s; }
+    .waveform-bar:nth-child(3) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+    .waveform-bar:nth-child(5) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(6) { animation-delay: 0.25s; }
+    .waveform-bar:nth-child(7) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(8) { animation-delay: 0.35s; }
+    .waveform-bar:nth-child(9) { animation-delay: 0s; }
+    .waveform-bar:nth-child(10) { animation-delay: 0.05s; }
+    .waveform-bar:nth-child(11) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(12) { animation-delay: 0.15s; }
+    .waveform-bar:nth-child(13) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(14) { animation-delay: 0.25s; }
+    .waveform-bar:nth-child(15) { animation-delay: 0.3s; }
+    .waveform-bar:nth-child(16) { animation-delay: 0.35s; }
+    .waveform-bar:nth-child(17) { animation-delay: 0s; }
+    .waveform-bar:nth-child(18) { animation-delay: 0.05s; }
+    .waveform-bar:nth-child(19) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(20) { animation-delay: 0.15s; }
+    .waveform-bar:nth-child(21) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(22) { animation-delay: 0.25s; }
+
+    .chat-area { padding: 0 20px; }
+
+    .chat-bubbles {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 15px;
+      background: rgba(232, 82, 122, 0.05);
+      border-radius: 16px;
+      border: 1px solid #e8527a22;
+    }
+
+    .chat-bubbles::-webkit-scrollbar { width: 6px; }
+    .chat-bubbles::-webkit-scrollbar-track { background: transparent; }
+    .chat-bubbles::-webkit-scrollbar-thumb { background: #e8527a44; border-radius: 10px; }
+
+    .message {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-end;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user { justify-content: flex-end; }
+    .message.zara { justify-content: flex-start; }
+
+    .message-content {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+
+    .message.user .message-content {
+      background: linear-gradient(135deg, #e8527a 0%, #c43d62 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.zara .message-content {
+      background: #2d1020;
+      color: #f0d0d8;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e8527a33;
+    }
+
+    .message-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .message.zara .message-avatar { background: linear-gradient(135deg, #e8527a 0%, #c43d62 100%); }
+    .message.user .message-avatar { background: #3d1525; }
+
+    .typing-indicator {
+      display: none;
+      padding: 12px 16px;
+      background: #2d1020;
+      border-radius: 18px;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e8527a33;
+      max-width: 80px;
+      margin-bottom: 12px;
+    }
+
+    .typing-indicator.show {
+      display: inline-flex;
+      gap: 5px;
+    }
+
+    .typing-indicator span {
+      width: 7px;
+      height: 7px;
+      background: #e8527a;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+      30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    .input-area { padding: 20px; border-top: 1px solid #e8527a22; }
+
+    .input-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .text-input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid #e8527a33;
+      border-radius: 25px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: #2d1020;
+      color: #f0d0d8;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .text-input::placeholder { color: #885566; }
+    .text-input:focus { border-color: #e8527a; box-shadow: 0 0 0 3px rgba(232, 82, 122, 0.2); }
+
+    .btn-send {
+      width: 46px;
+      height: 46px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: linear-gradient(135deg, #e8527a 0%, #c43d62 100%);
+      color: white;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    .btn-send:hover { transform: scale(1.1); box-shadow: 0 5px 20px rgba(232, 82, 122, 0.4); }
+    .btn-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .voice-toggle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .voice-toggle-label {
+      color: #885566;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .btn-voice-toggle {
+      width: 60px;
+      height: 60px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+    }
+
+    .btn-voice-toggle.on {
+      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+      box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+      animation: voice-on-pulse 2s ease-in-out infinite;
+    }
+
+    .btn-voice-toggle.off {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      box-shadow: 0 4px 15px rgba(107, 116, 128, 0.4);
+    }
+
+    .btn-voice-toggle.premium {
+      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+      animation: premium-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes voice-on-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 6px 25px rgba(74, 222, 128, 0.6); }
+    }
+
+    @keyframes premium-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4); }
+      50% { transform: scale(1.08); box-shadow: 0 6px 25px rgba(168, 85, 247, 0.6); }
+    }
+
+    .btn-voice-toggle:hover { transform: scale(1.1); }
+
+    .welcome-message {
+      text-align: center;
+      padding: 20px 15px;
+      color: #885566;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .welcome-message strong { color: #e8527a; }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      padding: 10px 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin: 10px 0;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .setup-message {
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin: 10px 0;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .setup-message a { color: #fbbf24; text-decoration: underline; }
+
+    .premium-badge {
+      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="avatar-container">
+        <div class="avatar" id="avatar">
+          🌸
+          <div class="status-dot"></div>
+        </div>
+      </div>
+      <h1>Zara</h1>
+      <p class="status-text">Zara online hai 💕</p>
+      <p class="connection-status" id="connectionStatus">Initializing...</p>
+      <div id="premiumBadge"></div>
+      
+      <div class="waveform-container" id="waveform"></div>
+    </div>
+
+    <div class="chat-area">
+      <div class="chat-bubbles" id="chatBubbles">
+        <div class="welcome-message" id="welcomeMessage">
+          <strong>Hey Jaan! 👋</strong><br>
+          Main hoon Zara, tumhari AI girlfriend.<br>
+          🎤 Awaaz ON hai - bas bolo!<br>
+          Ya type karo - main sun rahi hoon! 💕
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <input 
+          type="text" 
+          class="text-input" 
+          id="textInput" 
+          placeholder="Type your message..."
+          autocomplete="off"
+        >
+        <button class="btn-send" id="sendBtn" title="Send Message">➤</button>
+      </div>
+      
+      <div class="voice-toggle-container">
+        <span class="voice-toggle-label" id="voiceToggleLabel">Voice is ON</span>
+        <button class="btn-voice-toggle on" id="voiceToggleBtn" title="Toggle Voice">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      isListening: false,
+      isSpeaking: false,
+      voiceEnabled: true,  // Voice ON by default
+      initialized: false,
+      messages: [],
+      userId: 'user_' + Math.random().toString(36).substr(2, 9),
+      audioContext: null,
+      isPlaying: false,
+      autoStarted: false
+    };
+
+    const chatBubbles = document.getElementById('chatBubbles');
+    const textInput = document.getElementById('textInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+    const voiceToggleLabel = document.getElementById('voiceToggleLabel');
+    const avatar = document.getElementById('avatar');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const waveform = document.getElementById('waveform');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const premiumBadge = document.getElementById('premiumBadge');
+
+    // Initialize waveform bars
+    function initWaveform() {
+      for (let i = 0; i < 22; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'waveform-bar';
+        bar.style.animationDelay = `${(i % 8) * 0.05}s`;
+        waveform.appendChild(bar);
+      }
+    }
+
+    function setWaveformActive(active) {
+      const bars = waveform.querySelectorAll('.waveform-bar');
+      bars.forEach(bar => {
+        bar.classList.toggle('active', active);
+      });
+    }
+
+    // Initialize and check API
+    async function initializeSystem() {
+      try {
+        connectionStatus.textContent = 'Checking APIs...';
+        
+        const healthResponse = await fetch('/api/health');
+        const health = await healthResponse.json();
+        
+        if (health.groq_configured) {
+          if (health.lovo_configured) {
+            connectionStatus.textContent = 'Lovo.ai Voice Ready! 🎵';
+            connectionStatus.style.color = '#a855f7';
+            premiumBadge.innerHTML = '<div class="premium-badge">🎵 Lovo.ai Aishwarya</div>';
+          } else {
+            connectionStatus.textContent = 'Groq API Ready! ⚡';
+            connectionStatus.style.color = '#4ade80';
+            premiumBadge.innerHTML = '<div class="premium-badge">⚠️ Add Lovo API Key</div>';
+          }
+          
+          voiceToggleBtn.className = 'btn-voice-toggle on';
+
+          state.voiceEnabled = true;
+          updateVoiceButton(true);
+
+          // Auto-start voice recognition immediately
+          initSpeechRecognition();
+
+          // Show status
+          setTimeout(() => {
+            connectionStatus.textContent = '🎤 Listening... Speak now!';
+            connectionStatus.style.color = '#4ade80';
+          }, 2000);
+          
+        } else {
+          connectionStatus.textContent = 'API not configured';
+          connectionStatus.style.color = '#f59e0b';
+          showSystemMessage(`
+            <strong>Setup Required!</strong><br>
+            1. Get FREE Groq API key: <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a><br>
+            2. Add to .env file: GROQ_API_KEY=your_key<br>
+            3. Restart server & refresh
+          `);
+        }
+
+      } catch (error) {
+        console.error('Initialization error:', error);
+        connectionStatus.textContent = 'Connection error';
+        connectionStatus.style.color = '#ef4444';
+      }
+    }
+
+    function updateVoiceButton(isOn) {
+      if (isOn) {
+        voiceToggleBtn.className = 'btn-voice-toggle on';
+        voiceToggleBtn.innerHTML = '🔊';
+        voiceToggleLabel.textContent = 'Voice is ON';
+      } else {
+        voiceToggleBtn.className = 'btn-voice-toggle off';
+        voiceToggleBtn.innerHTML = '🔇';
+        voiceToggleLabel.textContent = 'Voice is OFF';
+      }
+    }
+
+    // Initialize Speech Recognition - AUTO START
+    function initSpeechRecognition() {
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        state.recognition = new SpeechRecognition();
+        state.recognition.continuous = true;  // Always listening
+        state.recognition.interimResults = false;
+        state.recognition.lang = 'hi-IN';  // Hindi language
+
+        state.recognition.onstart = () => {
+          state.isListening = true;
+          state.autoStarted = true;
+          connectionStatus.textContent = '🎤 Listening... Speak now!';
+          connectionStatus.style.color = '#4ade80';
+        };
+
+        state.recognition.onend = () => {
+          state.isListening = false;
+          // Auto-restart if voice is enabled (continuous listening)
+          if (state.voiceEnabled && state.recognition) {
+            try {
+              state.recognition.start();
+            } catch (e) {
+              // Ignore restart errors
+            }
+          }
+        };
+
+        state.recognition.onresult = (event) => {
+          const transcript = event.results[event.results.length - 1][0].transcript;
+          if (transcript.trim()) {
+            textInput.value = transcript;
+            sendMessage();  // Auto-send when speech detected
+          }
+        };
+
+        state.recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          state.isListening = false;
+          
+          if (event.error === 'not-allowed') {
+            connectionStatus.textContent = '❌ Mic access denied';
+            connectionStatus.style.color = '#ef4444';
+            showSystemMessage('Microphone access denied. Please enable in browser settings.');
+          }
+        };
+
+        // Auto-start listening immediately
+        try {
+          state.recognition.start();
+          connectionStatus.textContent = '🎤 Starting mic...';
+        } catch (e) {
+          console.log('Speech recognition auto-start failed, will retry');
+          connectionStatus.textContent = '⚠️ Click to enable mic';
+        }
+      } else {
+        connectionStatus.textContent = '❌ Not supported';
+        showSystemMessage('Speech recognition not supported in this browser. Use Chrome.');
+      }
+    }
+
+    // Play audio from URL (Google TTS)
+    function playAudioFromUrl(url) {
+      return new Promise((resolve) => {
+        if (!state.voiceEnabled || !url) {
+          resolve(false);
+          return;
+        }
+
+        try {
+          state.isPlaying = true;
+          state.isSpeaking = true;
+          avatar.classList.add('speaking');
+          setWaveformActive(true);
+
+          const audio = new Audio(url);
+          
+          audio.onended = () => {
+            state.isPlaying = false;
+            state.isSpeaking = false;
+            avatar.classList.remove('speaking');
+            setWaveformActive(false);
+            resolve(true);
+          };
+
+          audio.onerror = (e) => {
+            console.error('Audio URL error:', e);
+            state.isPlaying = false;
+            state.isSpeaking = false;
+            avatar.classList.remove('speaking');
+            setWaveformActive(false);
+            resolve(false);
+          };
+
+          audio.play().catch(err => {
+            console.error('Audio play error:', err);
+            state.isPlaying = false;
+            state.isSpeaking = false;
+            avatar.classList.remove('speaking');
+            setWaveformActive(false);
+            resolve(false);
+          });
+
+        } catch (error) {
+          console.error('Audio setup error:', error);
+          state.isSpeaking = false;
+          avatar.classList.remove('speaking');
+          setWaveformActive(false);
+          resolve(false);
+        }
+      });
+    }
+
+    // Fallback to Web Speech API with Hindi voice
+    function speakText(text) {
+      if (!state.voiceEnabled || !window.speechSynthesis) return;
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      // Try to find Hindi voice
+      const voices = window.speechSynthesis.getVoices();
+      const hindiVoice = voices.find(voice => 
+        voice.lang.includes('hi') || voice.lang.includes('Hindi') || voice.lang.includes('hi-IN')
+      );
+      
+      // Fallback to Indian English voice
+      const indianVoice = voices.find(voice => 
+        voice.lang.includes('en-IN') || voice.lang.includes('India')
+      );
+
+      if (hindiVoice) {
+        utterance.voice = hindiVoice;
+      } else if (indianVoice) {
+        utterance.voice = indianVoice;
+      } else {
+        // Use any female voice
+        const femaleVoice = voices.find(voice =>
+          voice.name.includes('Female') || voice.name.includes('female')
+        );
+        if (femaleVoice) utterance.voice = femaleVoice;
+      }
+      
+      utterance.pitch = 1.1;
+      utterance.rate = 0.9;
+      utterance.volume = 1;
+
+      utterance.onstart = () => {
+        state.isSpeaking = true;
+        avatar.classList.add('speaking');
+        setWaveformActive(true);
+      };
+
+      utterance.onend = () => {
+        state.isSpeaking = false;
+        avatar.classList.remove('speaking');
+        setWaveformActive(false);
+      };
+
+      utterance.onerror = () => {
+        state.isSpeaking = false;
+        avatar.classList.remove('speaking');
+        setWaveformActive(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function addMessage(content, isUser = false) {
+      welcomeMessage.style.display = 'none';
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user' : 'zara'}`;
+      const avatarEmoji = isUser ? '👤' : '🌸';
+      
+      messageDiv.innerHTML = `
+        ${!isUser ? `<div class="message-avatar">${avatarEmoji}</div>` : ''}
+        <div class="message-content">${escapeHtml(content)}</div>
+        ${isUser ? `<div class="message-avatar">${avatarEmoji}</div>` : ''}
+      `;
+
+      chatBubbles.appendChild(messageDiv);
+      chatBubbles.scrollTop = chatBubbles.scrollHeight;
+      state.messages.push({ role: isUser ? 'user' : 'assistant', content });
+    }
+
+    function showTypingIndicator() {
+      welcomeMessage.style.display = 'none';
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'typing-indicator show';
+      typingDiv.id = 'typingIndicator';
+      typingDiv.innerHTML = '<span></span><span></span><span></span>';
+      chatBubbles.appendChild(typingDiv);
+      chatBubbles.scrollTop = chatBubbles.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typingIndicator = document.getElementById('typingIndicator');
+      if (typingIndicator) typingIndicator.remove();
+    }
+
+    function showSystemMessage(html) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'setup-message';
+      msgDiv.innerHTML = html;
+      chatBubbles.appendChild(msgDiv);
+      chatBubbles.scrollTop = chatBubbles.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = textInput.value.trim();
+      if (!message) return;
+
+      addMessage(message, true);
+      textInput.value = '';
+      showTypingIndicator();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: state.messages, userMessage: message, userId: state.userId }),
+        });
+
+        removeTypingIndicator();
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to get response');
+        }
+
+        const data = await response.json();
+
+        addMessage(data.reply, false);
+
+        // Play audio from URL (Google TTS) or use Web Speech API
+        if (data.audio && typeof data.audio === 'string' && data.audio.startsWith('http')) {
+          // It's a URL, play it
+          const played = await playAudioFromUrl(data.audio);
+          if (!played) speakText(data.reply);
+        } else if (data.audio) {
+          // It's base64, use Web Speech API instead
+          speakText(data.reply);
+        } else {
+          speakText(data.reply);
+        }
+
+      } catch (error) {
+        removeTypingIndicator();
+        console.error('Error:', error);
+        showSystemMessage('Oops! Kuch error ho gaya. Please try again.');
+      }
+    }
+
+    async function fetchGreeting() {
+      showTypingIndicator();
+      
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [],
+            userMessage: 'Hey Zara! Start our conversation. Greet me lovingly in Roman Urdu/Hinglish (English script) like you\'re on a voice call with your boyfriend.',
+            userId: state.userId
+          }),
+        });
+
+        removeTypingIndicator();
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to get greeting');
+        }
+
+        const data = await response.json();
+
+        welcomeMessage.style.display = 'none';
+        addMessage(data.reply, false);
+
+        // Play audio from URL (Google TTS) or use Web Speech API
+        if (data.audio && typeof data.audio === 'string' && data.audio.startsWith('http')) {
+          const played = await playAudioFromUrl(data.audio);
+          if (!played) speakText(data.reply);
+        } else if (data.audio) {
+          speakText(data.reply);
+        } else {
+          speakText(data.reply);
+        }
+
+      } catch (error) {
+        removeTypingIndicator();
+        console.error('Error fetching greeting:', error);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Event Listeners
+    sendBtn.addEventListener('click', sendMessage);
+    textInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    voiceToggleBtn.addEventListener('click', () => {
+      state.voiceEnabled = !state.voiceEnabled;
+      
+      if (state.voiceEnabled) {
+        updateVoiceButton(true);
+        connectionStatus.textContent = '🎤 Listening... Speak now!';
+        connectionStatus.style.color = '#4ade80';
+        // Restart speech recognition
+        if (state.recognition && !state.isListening) {
+          try { state.recognition.start(); } catch (e) {}
+        }
+      } else {
+        updateVoiceButton(false);
+        connectionStatus.textContent = '🔇 Voice OFF';
+        connectionStatus.style.color = '#6b7280';
+        // Stop speech recognition
+        if (state.recognition) {
+          state.recognition.stop();
+        }
+        // Cancel any ongoing speech
+        if (state.audioContext && state.isPlaying) {
+          state.audioContext.suspend();
+        }
+        state.isSpeaking = false;
+        avatar.classList.remove('speaking');
+        setWaveformActive(false);
+      }
+    });
+
+    // Initialize
+    window.addEventListener('load', () => {
+      initWaveform();
+      initializeSystem();
+      setTimeout(fetchGreeting, 1500);
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && state.audioContext && state.isPlaying) {
+        state.audioContext.suspend();
+        setWaveformActive(false);
+      }
+    });
+  </script>
+</body>
+</html>
