@@ -396,13 +396,41 @@ class CommandRouter:
             result = self.media_player.zoom_reset()
             return {"success": True, "response": "Zoom reset", "action": "zoom_reset"}
 
-        # Open website
-        if cmd.startswith("open ") and any(site in cmd for site in ["youtube.com", "spotify.com", "netflix", "google"]):
-            url = cmd.replace("open ", "").strip()
-            if not url.startswith("http"):
-                url = "https://" + url
-            result = self.media_player.open_browser(url)
-            return {"success": True, "response": f"Opening {url}", "action": "open_url"}
+        # Open website - Enhanced with more sites (including Hindi/Hinglish)
+        if any(kw in cmd for kw in ["youtube", "google", "facebook", "instagram", "twitter", "linkedin", 
+                                     "github", "reddit", "netflix", "amazon", "whatsapp web", "gmail"]):
+            
+            # Map common names to URLs
+            url_map = {
+                "youtube": "https://youtube.com",
+                "google": "https://google.com",
+                "facebook": "https://facebook.com",
+                "insta": "https://instagram.com",
+                "instagram": "https://instagram.com",
+                "twitter": "https://twitter.com",
+                "x": "https://twitter.com",
+                "linkedin": "https://linkedin.com",
+                "github": "https://github.com",
+                "stackoverflow": "https://stackoverflow.com",
+                "reddit": "https://reddit.com",
+                "netflix": "https://netflix.com",
+                "amazon": "https://amazon.com",
+                "whatsapp": "https://web.whatsapp.com",
+                "whatsapp web": "https://web.whatsapp.com",
+                "gmail": "https://gmail.com",
+                "drive": "https://drive.google.com",
+                "docs": "https://docs.google.com",
+                "sheets": "https://sheets.google.com",
+                "slides": "https://slides.google.com",
+                "maps": "https://maps.google.com",
+                "news": "https://news.google.com",
+            }
+            
+            # Find which site is mentioned
+            for site_name, url in url_map.items():
+                if site_name in cmd:
+                    result = self.media_player.open_browser(url)
+                    return {"success": True, "response": f"Opening {url}", "action": "open_url"}
 
         return None
 
