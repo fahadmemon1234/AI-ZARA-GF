@@ -35,6 +35,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "RmT0JE37YE1NfodnZBnw")
 
+# Genny (LOVO AI) API Key (for text-to-speech)
+GENNY_API_KEY = os.getenv("GENNY_API_KEY", "")
+
 # News API Key (optional - for news headlines)
 NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 

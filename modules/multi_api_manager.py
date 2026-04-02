@@ -15,7 +15,8 @@ from config import (
     MEM0_API_KEY,
     LIVEKIT_API_KEY,
     LIVEKIT_API_SECRET,
-    LIVEKIT_URL
+    LIVEKIT_URL,
+    GENNY_API_KEY
 )
 
 
@@ -33,6 +34,7 @@ class MultiAPIManager:
         self._init_gemini()
         self._init_openai()
         self._init_elevenlabs()
+        self._init_genny()  # Initialize Genny (LOVO AI)
         self._init_livekit()
         self._init_mem0()
 
@@ -396,6 +398,106 @@ class MultiAPIManager:
                 "success": False,
                 "error": f"ElevenLabs error: {str(e)}",
                 "provider": "elevenlabs"
+            }
+
+    # ============== Genny (LOVO AI) TTS ==============
+
+    def _init_genny(self):
+        """Initialize Genny (LOVO AI) client."""
+        if GENNY_API_KEY and GENNY_API_KEY != "your_genny_api_key_here":
+            self.clients['genny'] = {
+                'api_key': GENNY_API_KEY,
+                'base_url': 'https://api.genny.lovo.ai'
+            }
+            print("✅ Genny (LOVO AI) initialized")
+        else:
+            self.clients['genny'] = None
+
+    def genny_tts(self, text: str, speaker_id: str = "65fbfd078f5016c03b6c4f4e", style: str = "narration") -> Dict[str, Any]:
+        """
+        Generate speech using Genny (LOVO AI) API.
+
+        Args:
+            text: Text to convert to speech
+            speaker_id: Speaker ID (default: Zoe Williams - en-US female voice)
+            style: Speaking style (narration, conversational, angry, etc.)
+
+        Returns:
+            Response with audio URL
+        """
+        client = self.clients.get('genny')
+        if not client:
+            return {
+                "success": False,
+                "error": "Genny (LOVO AI) not available. Please check GENNY_API_KEY.",
+                "provider": "genny"
+            }
+
+        try:
+            import requests
+            import base64
+            import json
+
+            # Correct Genny API endpoint
+            url = f"{client['base_url']}/api/v1/tts"
+
+            headers = {
+                "X-API-KEY": client['api_key'],
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+
+            # Genny API requires speaker (not voice_id)
+            data = {
+                "text": text,
+                "speaker": speaker_id,  # Changed from voice_id to speaker
+                "style": style,
+                "format": "mp3"
+            }
+
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+
+            if response.status_code == 200:
+                result = response.json()
+                audio_url = result.get('audio_url')
+                
+                if audio_url:
+                    # Download audio file
+                    audio_response = requests.get(audio_url, timeout=30)
+                    audio_base64 = base64.b64encode(audio_response.content).decode('utf-8')
+                    return {
+                        "success": True,
+                        "audio_base64": audio_base64,
+                        "provider": "genny",
+                        "speaker_id": speaker_id,
+                        "style": style,
+                        "text_length": len(text)
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "error": "No audio URL in response",
+                        "provider": "genny"
+                    }
+            else:
+                error_detail = response.text
+                return {
+                    "success": False,
+                    "error": f"Genny API error {response.status_code}: {error_detail}",
+                    "provider": "genny"
+                }
+
+        except requests.exceptions.Timeout:
+            return {
+                "success": False,
+                "error": "Genny request timed out",
+                "provider": "genny"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Genny error: {str(e)}",
+                "provider": "genny"
             }
 
     def get_elevenlabs_voices(self) -> Dict[str, Any]:

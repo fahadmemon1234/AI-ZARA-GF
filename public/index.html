@@ -1064,7 +1064,7 @@
 
         <!-- Footer -->
         <footer>
-            <p>Zara v2.0 - Your AI Girlfriend 💕 | Pink Theme | Ultra-Realistic Voice | Powered by ElevenLabs Flash v2.5</p>
+            <p>Zara v2.0 - Your AI Girlfriend 💕 | Pink Theme | Ultra-Realistic Voice | Powered by ElevenLabs</p>
         </footer>
     </div>
 
@@ -1420,22 +1420,22 @@
 
         // ============== Text-to-Speech ==============
         async function speakResponse(text) {
-            // AUTO SPEAK MODE - Ultra-realistic ElevenLabs voice
+            // AUTO SPEAK MODE - ElevenLabs ultra-realistic voice
             try {
                 const response = await fetch(`${API_BASE}/api/tts/elevenlabs`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: text })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success && data.audio_base64) {
-                    // Play ElevenLabs audio (Bella - Ultra Realistic Female Voice)
+                    // Play ElevenLabs audio (Ultra Realistic Female Voice)
                     const audio = new Audio('data:audio/mp3;base64,' + data.audio_base64);
                     audio.onplay = () => {
                         startWave();
-                        console.log('[ZARA] 🎤 🌟 Ultra-realistic voice speaking:', text.substring(0, 50) + '...');
+                        console.log('[ZARA] 🎤 🌟 ElevenLabs ultra-realistic voice speaking:', text.substring(0, 50) + '...');
                     };
                     audio.onended = () => {
                         stopWave();
@@ -1453,7 +1453,7 @@
             } catch (e) {
                 console.error('[ZARA] ElevenLabs endpoint error:', e);
             }
-            
+
             // FALLBACK: Use browser TTS if ElevenLabs fails
             console.log('[ZARA] Using browser TTS fallback');
             speakText(text);
