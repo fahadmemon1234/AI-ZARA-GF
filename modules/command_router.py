@@ -4,6 +4,8 @@ Command Router Module - Intent detection and command routing
 """
 
 import re
+import os
+import time
 from typing import Dict, Any, Optional
 
 # Import all modules
@@ -70,7 +72,11 @@ class CommandRouter:
 
         command_lower = command.lower().strip()
 
-        # Try each routing rule in order
+        # Try each routing rule in order - PRIORITY ORDER
+        result = self._try_media_commands(command_lower)
+        if result:
+            return result
+
         result = self._try_system_commands(command_lower)
         if result:
             return result
@@ -87,10 +93,6 @@ class CommandRouter:
         if result:
             return result
 
-        result = self._try_media_commands(command_lower)
-        if result:
-            return result
-
         result = self._try_window_commands(command_lower)
         if result:
             return result
@@ -99,7 +101,19 @@ class CommandRouter:
         if result:
             return result
 
+        result = self._try_pdf_commands(command_lower)
+        if result:
+            return result
+
+        result = self._try_file_commands(command_lower)
+        if result:
+            return result
+
         result = self._try_whatsapp_commands(command_lower)
+        if result:
+            return result
+
+        result = self._try_mouse_keyboard_commands(command_lower)
         if result:
             return result
 
@@ -136,6 +150,10 @@ class CommandRouter:
             return result
 
         result = self._try_file_commands(command_lower)
+        if result:
+            return result
+
+        result = self._try_mouse_keyboard_commands(command_lower)
         if result:
             return result
 
@@ -233,11 +251,80 @@ class CommandRouter:
 
     def _try_app_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try application commands."""
-        # Open app
-        open_patterns = ["open ", "launch ", "start "]
+        # Special apps - WhatsApp Desktop, Paint, VS Code
+        if any(kw in cmd for kw in ["whatsapp desktop", "whatsapp app", "system whatsapp"]):
+            # WhatsApp Desktop path
+            whatsapp_path = os.path.join(os.environ.get("LOCALAPPDATA", ""), "WhatsApp", "WhatsApp.exe")
+            if os.path.exists(whatsapp_path):
+                os.startfile(whatsapp_path)
+                return {"success": True, "response": "Opening WhatsApp Desktop", "action": "open_whatsapp_desktop"}
+            else:
+                return {"success": False, "response": "WhatsApp Desktop not found. Use WhatsApp Web instead.", "action": "whatsapp_not_found"}
+        
+        # Paint / Painting
+        if any(kw in cmd for kw in ["paint", "painting", "draw", "chitrokari"]):
+            os.startfile("mspaint.exe")
+            return {"success": True, "response": "Opening Paint for you! 🎨", "action": "open_paint"}
+        
+        # VS Code / Code / Visual Studio Code
+        if any(kw in cmd for kw in ["vs code", "visual studio code", "code", "coding", "code likho"]):
+            vscode_path = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Microsoft VS Code", "Code.exe")
+            if os.path.exists(vscode_path):
+                os.startfile(vscode_path)
+                return {"success": True, "response": "Opening VS Code for coding! 💻", "action": "open_vscode"}
+            else:
+                # Try alternative path
+                alt_path = r"C:\Users\%USERNAME%\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+                alt_path = os.path.expandvars(alt_path)
+                if os.path.exists(alt_path):
+                    os.startfile(alt_path)
+                    return {"success": True, "response": "Opening VS Code for coding! 💻", "action": "open_vscode"}
+                return {"success": False, "response": "VS Code not found. Please install VS Code.", "action": "vscode_not_found"}
+        
+        # Write code in VS Code
+        if any(kw in cmd for kw in ["code likho", "write code", "python code", "javascript code", "react code"]):
+            # Extract programming language and code description
+            code_desc = cmd.replace("code likho", "").replace("write code", "").replace("python", "").replace("javascript", "").replace("react", "").strip()
+            if not code_desc:
+                code_desc = "simple program"
+            
+            # Open VS Code first
+            vscode_path = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "Microsoft VS Code", "Code.exe")
+            if os.path.exists(vscode_path):
+                os.startfile(vscode_path)
+                return {"success": True, "response": f"Opening VS Code to write {code_desc} code! 💻", "action": "open_vscode_coding"}
+            else:
+                return {"success": False, "response": "VS Code not found", "action": "vscode_not_found"}
+        
+        # Type in Notepad - Auto type whatever user says (including single word "notepad")
+        if any(kw in cmd for kw in ["notepad mai likho", "notepad mein type", "type in notepad", "notepad type", "notepad"]):
+            # Extract text to type
+            text_to_type = cmd.replace("notepad mai likho", "").replace("notepad mein type", "").replace("type in notepad", "").replace("notepad type", "").replace("notepad", "").strip()
+            
+            if text_to_type:
+                # Open Notepad
+                os.startfile("notepad.exe")
+                time.sleep(1)  # Wait for Notepad to open
+                
+                # Type the text using pyautogui
+                self.mouse_keyboard.type_text(text_to_type)
+                
+                return {"success": True, "response": f"Typed '{text_to_type}' in Notepad", "action": "notepad_type"}
+            else:
+                # Just open Notepad if no text provided
+                os.startfile("notepad.exe")
+                return {"success": True, "response": "Opening Notepad", "action": "open_notepad"}
+        
+        # Open app - English and Hindi
+        open_patterns = ["open ", "launch ", "start ", "khol ", "kholo ", "khol do ", "chalao "]
         for pattern in open_patterns:
-            if cmd.startswith(pattern):
-                app_name = cmd[len(pattern):].strip()
+            if cmd.startswith(pattern) or pattern in cmd:
+                # Extract app name
+                for p in open_patterns:
+                    if p in cmd:
+                        app_name = cmd.split(p, 1)[1].strip()
+                        break
+                app_name = app_name.replace("do", "").replace("kar do", "").strip()
                 result = self.app_manager.open_app(app_name)
                 return {
                     "success": result.get("success", False),
@@ -246,8 +333,8 @@ class CommandRouter:
                     "app": app_name
                 }
 
-        # Close app
-        close_patterns = ["close ", "quit ", "exit ", "stop "]
+        # Close app - English and Hindi
+        close_patterns = ["close ", "quit ", "exit ", "stop ", "band ", "band karo "]
         for pattern in close_patterns:
             if cmd.startswith(pattern):
                 app_name = cmd[len(pattern):].strip()
@@ -274,8 +361,9 @@ class CommandRouter:
 
     def _try_volume_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try volume commands."""
-        # Volume up
-        if any(kw in cmd for kw in ["volume up", "increase volume", "volume higher", "turn up volume"]):
+        # Volume up - English and Hindi (including single word "volume")
+        if any(kw in cmd for kw in ["volume up", "increase volume", "volume higher", "turn up volume",
+                                      "volume badha", "volume badhao", "volume badha do", "aawaz badha", "volume"]):
             step = self._extract_number(cmd) or 10
             result = self.volume_control.increase_volume(step)
             return {
@@ -284,8 +372,9 @@ class CommandRouter:
                 "action": "volume_up"
             }
 
-        # Volume down
-        if any(kw in cmd for kw in ["volume down", "decrease volume", "volume lower", "turn down volume"]):
+        # Volume down - English and Hindi
+        if any(kw in cmd for kw in ["volume down", "decrease volume", "volume lower", "turn down volume",
+                                      "volume kam", "volume kam karo", "volume kam karo", "aawaz kam"]):
             step = self._extract_number(cmd) or 10
             result = self.volume_control.decrease_volume(step)
             return {
@@ -295,7 +384,7 @@ class CommandRouter:
             }
 
         # Mute toggle
-        if any(kw in cmd for kw in ["mute", "unmute", "toggle mute"]):
+        if any(kw in cmd for kw in ["mute", "unmute", "toggle mute", "mute karo", "aawaz band"]):
             result = self.volume_control.toggle_mute()
             status = "muted" if self.volume_control.is_muted() else "unmuted"
             return {"success": True, "response": f"Audio {status}", "action": "mute_toggle"}
@@ -318,8 +407,9 @@ class CommandRouter:
 
     def _try_brightness_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try brightness commands."""
-        # Brightness up
-        if any(kw in cmd for kw in ["brightness up", "increase brightness", "brighter", "screen brighter"]):
+        # Brightness up - English and Hindi (including single word "brightness")
+        if any(kw in cmd for kw in ["brightness up", "increase brightness", "brighter", "screen brighter",
+                                      "brightness badha", "brightness badhao", "brightness badha do", "brightness"]):
             step = self._extract_number(cmd) or 10
             result = self.brightness_control.increase_brightness(step)
             return {
@@ -328,8 +418,9 @@ class CommandRouter:
                 "action": "brightness_up"
             }
 
-        # Brightness down
-        if any(kw in cmd for kw in ["brightness down", "decrease brightness", "dimmer", "screen dimmer"]):
+        # Brightness down - English and Hindi
+        if any(kw in cmd for kw in ["brightness down", "decrease brightness", "dimmer", "screen dimmer",
+                                      "brightness kam", "brightness kam karo", "kam karo"]):
             step = self._extract_number(cmd) or 10
             result = self.brightness_control.decrease_brightness(step)
             return {
@@ -432,9 +523,176 @@ class CommandRouter:
                     result = self.media_player.open_browser(url)
                     return {"success": True, "response": f"Opening {url}", "action": "open_url"}
 
+        # Play song on YouTube - Enhanced for ANY video
+        if any(kw in cmd for kw in ["song", "gaana", "music", "gaana", "sangeet", "play ", "baja ", "laga ", "chalao ", "video", "dikhao", "youtube"]):
+            if "youtube" in cmd or any(kw in cmd for kw in ["song", "gaana", "music", "play ", "baja ", "laga ", "chalao ", "video", "dikhao"]):
+                # Extract video name - remove all common keywords
+                video_query = cmd
+                remove_keywords = ["play ", "baja ", "laga ", "chalao ", "dikhao ", "do", "karo", "youtube", "pe", "par", "video", "song", "gaana", "music", "sangeet", "movie", "trailer", "full"]
+                for keyword in remove_keywords:
+                    video_query = video_query.replace(keyword, "")
+                video_query = video_query.strip()
+                
+                if not video_query or len(video_query) < 3:
+                    video_query = "latest hindi songs 2024"
+                
+                url = f"https://youtube.com/results?search_query={video_query.replace(' ', '+')}"
+                result = self.media_player.open_browser(url)
+                return {"success": True, "response": f"Playing {video_query} on YouTube", "action": "play_song"}
+
+        # Play on Spotify
+        if "spotify" in cmd or "spotify pe" in cmd:
+            song_query = cmd.replace("spotify", "").replace("pe", "").replace("play ", "").replace("baja ", "").strip()
+            if not song_query:
+                song_query = "top hits"
+            url = f"https://open.spotify.com/search/{song_query.replace(' ', '%20')}"
+            result = self.media_player.open_browser(url)
+            return {"success": True, "response": f"Playing {song_query} on Spotify", "action": "spotify_play"}
+
         return None
 
-    # ============== Window Commands ==============
+    # ============== PDF Commands ==============
+
+    def _try_pdf_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
+        """Try PDF commands."""
+        # Merge PDFs
+        if any(kw in cmd for kw in ["merge pdf", "join pdf", "pdf jodo", "pdf merge", "combine pdf"]):
+            # Auto-find PDFs in Downloads folder
+            downloads = os.path.join(os.path.expanduser("~"), "Downloads")
+            pdf_files = [os.path.join(downloads, f) for f in os.listdir(downloads) if f.endswith('.pdf')][:5]
+            
+            if pdf_files:
+                result = self.pdf_tools.merge_pdfs(pdf_files)
+                return {"success": True, "response": f"Merged {len(pdf_files)} PDFs", "action": "merge_pdfs"}
+            else:
+                return {"success": False, "response": "No PDFs found in Downloads folder", "action": "merge_pdfs"}
+
+        # PDF to Images
+        if any(kw in cmd for kw in ["pdf to images", "pdf se images", "pdf convert", "convert pdf"]):
+            result = self.pdf_tools.pdf_to_images()
+            return {"success": True, "response": "PDF converted to images", "action": "pdf_to_images"}
+
+        return None
+
+    # ============== File Commands ==============
+
+    def _try_file_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
+        """Try file management commands."""
+        # Create folder
+        if any(kw in cmd for kw in ["create folder", "folder banao", "new folder", "folder create"]):
+            folder_name = "New Folder"
+            if "named" in cmd or "naam" in cmd:
+                match = re.search(r'(?:named |naam )(.+)', cmd)
+                if match:
+                    folder_name = match.group(1).strip()
+            result = self.file_manager.create_folder(folder_name)
+            return {"success": True, "response": f"Folder '{folder_name}' created", "action": "create_folder"}
+
+        # Delete file
+        if any(kw in cmd for kw in ["delete file", "file delete", "remove file", "file hatao"]):
+            result = self.file_manager.delete_file()
+            return {"success": True, "response": "File deleted", "action": "delete_file"}
+
+        # Open folder
+        if any(kw in cmd for kw in ["open folder", "folder kholo", "folder open"]):
+            folder = "Documents"
+            if "downloads" in cmd:
+                folder = "Downloads"
+            elif "pictures" in cmd or "photos" in cmd:
+                folder = "Pictures"
+            elif "desktop" in cmd:
+                folder = "Desktop"
+            result = self.file_manager.open_folder(folder)
+            return {"success": True, "response": f"Opening {folder}", "action": "open_folder"}
+
+        return None
+
+    # ============== Mouse & Keyboard Commands ==============
+
+    def _try_mouse_keyboard_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
+        """Try mouse and keyboard commands."""
+        # Click
+        if any(kw in cmd for kw in ["click", "click karo", "mouse click"]):
+            result = self.mouse_keyboard.click()
+            return {"success": True, "response": "Clicked", "action": "click"}
+
+        # Double click
+        if any(kw in cmd for kw in ["double click", "double click karo"]):
+            result = self.mouse_keyboard.double_click()
+            return {"success": True, "response": "Double clicked", "action": "double_click"}
+
+        # Type text
+        if any(kw in cmd for kw in ["type ", "likho ", "type karo "]):
+            text = cmd.replace("type ", "").replace("likho ", "").replace("type karo ", "").strip()
+            result = self.mouse_keyboard.type_text(text)
+            return {"success": True, "response": f"Typed: {text}", "action": "type"}
+
+        # Press key
+        if any(kw in cmd for kw in ["press ", "dabao ", "press key"]):
+            key = cmd.replace("press ", "").replace("dabao ", "").replace("press key", "").strip()
+            result = self.mouse_keyboard.press_key(key)
+            return {"success": True, "response": f"Pressed {key}", "action": "press_key"}
+
+        return None
+
+    # ============== WhatsApp Commands ==============
+
+    def _try_whatsapp_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
+        """Try WhatsApp commands."""
+        # Open WhatsApp Web
+        if any(kw in cmd for kw in ["whatsapp", "whatsapp web", "whatsapp kholo"]):
+            # Open WhatsApp Web in browser
+            import webbrowser
+            webbrowser.open("https://web.whatsapp.com")
+            return {"success": True, "response": "Opening WhatsApp Web", "action": "open_whatsapp"}
+
+        # Send WhatsApp message to contact - Auto search and send
+        if any(kw in cmd for kw in ["whatsapp message", "whatsapp pe bhejo", "whatsapp send", "message bhejo"]):
+            # Extract contact name and message
+            # Pattern: "whatsapp pe [name] ko [message] bhejo"
+            contact_name = ""
+            message_text = ""
+            
+            # Try to extract contact name (between "ko" and next keyword)
+            ko_match = re.search(r'ko (.+?)(?:ko|message|msg|bhejo|send|likh|$)', cmd)
+            if ko_match:
+                contact_name = ko_match.group(1).strip()
+            
+            # Extract message (after contact name or after "likh" or "message")
+            msg_patterns = ["likh", "message", "msg", "bhejo", "send", "likha"]
+            for pattern in msg_patterns:
+                if pattern in cmd:
+                    msg_idx = cmd.find(pattern)
+                    message_text = cmd[msg_idx + len(pattern):].strip()
+                    message_text = message_text.replace("ko", "").replace("bhejo", "").replace("send", "").strip()
+                    break
+            
+            if contact_name and message_text:
+                # Open WhatsApp Web
+                import webbrowser
+                webbrowser.open("https://web.whatsapp.com")
+                time.sleep(3)  # Wait for WhatsApp to load
+                
+                # Search for contact
+                self.mouse_keyboard.type_text(contact_name)
+                time.sleep(1)
+                
+                # Press Enter to select contact
+                self.mouse_keyboard.press_key("enter")
+                time.sleep(1)
+                
+                # Type message
+                self.mouse_keyboard.type_text(message_text)
+                time.sleep(0.5)
+                
+                # Press Enter to send
+                self.mouse_keyboard.press_key("enter")
+                
+                return {"success": True, "response": f"Message sent to {contact_name}: '{message_text}'", "action": "whatsapp_send_message"}
+            else:
+                return {"success": False, "response": "Please provide contact name and message. Example: 'WhatsApp pe Rahul ko hello bhejo'", "action": "whatsapp_incomplete"}
+
+        return None
 
     def _try_window_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try window management commands."""
@@ -506,31 +764,6 @@ class CommandRouter:
 
         return None
 
-    # ============== WhatsApp Commands ==============
-
-    def _try_whatsapp_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
-        """Try WhatsApp commands."""
-        # Send WhatsApp message
-        if any(kw in cmd for kw in ["send whatsapp", "whatsapp message", "wa message"]):
-            # Extract contact and message
-            match = re.search(r'send whatsapp (?:message )?to (\w+) (.+)', cmd)
-            if match:
-                contact = match.group(1)
-                message = match.group(2)
-                return {
-                    "success": True,
-                    "response": f"Opening WhatsApp to send '{message}' to {contact}",
-                    "action": "whatsapp_send",
-                    "needs_ai": True
-                }
-
-        # Open WhatsApp
-        if any(kw in cmd for kw in ["open whatsapp", "launch whatsapp"]):
-            result = self.whatsapp.get_qr_code()
-            return {"success": True, "response": "Opening WhatsApp Web", "action": "whatsapp_open"}
-
-        return None
-
     # ============== News Commands ==============
 
     def _try_news_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
@@ -568,11 +801,13 @@ class CommandRouter:
 
     def _try_time_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try time/date commands."""
-        if any(kw in cmd for kw in ["what time", "current time", "time is it"]):
+        # Time - including single word "time"
+        if any(kw in cmd for kw in ["what time", "current time", "time is it", "kya time", "time batao", "time kya hua", "time"]):
             result = self.google_search.get_datetime()
             return {"success": True, "response": f"Current time is {result.get('time')}", "action": "time"}
 
-        if any(kw in cmd for kw in ["what date", "current date", "what day", "today's date"]):
+        # Date - including single word "date"
+        if any(kw in cmd for kw in ["what date", "current date", "what day", "today's date", "kya date", "date batao", "aaj kya hai", "date"]):
             result = self.google_search.get_datetime()
             return {"success": True, "response": f"Today is {result.get('date')}", "action": "date"}
 
@@ -597,28 +832,6 @@ class CommandRouter:
                 summary = "\n".join([f"- {m.get('value', '')}" for m in memories[:5]])
                 return {"success": True, "response": f"Memories:\n{summary}", "action": "show_memory"}
             return {"success": True, "response": "I don't have any memories yet", "action": "show_memory"}
-
-        return None
-
-    # ============== PDF Commands ==============
-
-    def _try_pdf_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
-        """Try PDF commands."""
-        if "merge pdf" in cmd or "combine pdf" in cmd:
-            return {
-                "success": True,
-                "response": "Please provide PDF file paths to merge",
-                "action": "merge_pdfs",
-                "needs_ai": True
-            }
-
-        if "split pdf" in cmd:
-            return {
-                "success": True,
-                "response": "Please provide PDF file path to split",
-                "action": "split_pdf",
-                "needs_ai": True
-            }
 
         return None
 
@@ -694,15 +907,22 @@ class CommandRouter:
 
     def _try_file_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try file commands."""
-        if any(kw in cmd for kw in ["open documents", "my documents"]):
+        # Create folder
+        if any(kw in cmd for kw in ["folder banao", "create folder", "new folder", "folder create"]):
+            folder_name = "New Folder"
+            result = self.file_manager.create_folder(folder_name)
+            return {"success": True, "response": f"Folder '{folder_name}' created", "action": "create_folder"}
+        
+        # Open folders
+        if any(kw in cmd for kw in ["open documents", "my documents", "documents kholo"]):
             result = self.file_manager.open_documents()
             return {"success": True, "response": "Opening Documents folder", "action": "open_documents"}
 
-        if any(kw in cmd for kw in ["open downloads", "my downloads"]):
+        if any(kw in cmd for kw in ["open downloads", "my downloads", "downloads kholo"]):
             result = self.file_manager.open_downloads()
             return {"success": True, "response": "Opening Downloads folder", "action": "open_downloads"}
 
-        if any(kw in cmd for kw in ["open pictures", "my photos"]):
+        if any(kw in cmd for kw in ["open pictures", "my photos", "pictures kholo"]):
             result = self.file_manager.open_pictures()
             return {"success": True, "response": "Opening Pictures folder", "action": "open_pictures"}
 

@@ -1323,45 +1323,48 @@
             showTypingIndicator();
 
             try {
-                // Use /api/chat for conversations (girlfriend mode)
-                const response = await fetch(`${API_BASE}/api/chat`, {
+                // FIRST: Try /api/command for system commands (screenshots, volume, apps, etc.)
+                const cmdResponse = await fetch(`${API_BASE}/api/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: message })
+                });
+
+                const cmdData = await cmdResponse.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator();
+
+                // If command was executed successfully (not AI conversation)
+                if (cmdData.success && cmdData.action !== 'ai_conversation') {
+                    const reply = cmdData.response || cmdData.reply;
+                    document.getElementById('responseText').textContent = reply;
+                    addMessage('aria', reply);
+                    // AUTO SPEAK
+                    console.log('[ZARA] 💬 Zara speaking:', reply);
+                    speakResponse(reply);
+                    return;
+                }
+
+                // SECOND: Use /api/chat for AI conversations (girlfriend mode)
+                const chatResponse = await fetch(`${API_BASE}/api/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: message })
                 });
 
-                const data = await response.json();
+                const chatData = await chatResponse.json();
 
-                // Remove typing indicator
-                removeTypingIndicator();
-
-                if (data.success) {
-                    const reply = data.reply || data.response;
+                if (chatData.success) {
+                    const reply = chatData.reply || chatData.response;
                     document.getElementById('responseText').textContent = reply;
                     addMessage('aria', reply);
-                    
+
                     // AUTO SPEAK - Always speak response automatically
                     console.log('[ZARA] 💬 Zara speaking:', reply);
                     speakResponse(reply);
                 } else {
-                    // Fallback to /api/command for system commands
-                    const cmdResponse = await fetch(`${API_BASE}/api/command`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command: message })
-                    });
-
-                    const cmdData = await cmdResponse.json();
-                    if (cmdData.success) {
-                        const reply = cmdData.response || cmdData.reply;
-                        document.getElementById('responseText').textContent = reply;
-                        addMessage('aria', reply);
-                        // AUTO SPEAK
-                        console.log('[ZARA] 💬 Zara speaking:', reply);
-                        speakResponse(reply);
-                    } else {
-                        addMessage('error', data.reply || cmdData.response || 'Something went wrong');
-                    }
+                    addMessage('error', chatData.reply || cmdData.response || 'Something went wrong');
                 }
             } catch (error) {
                 removeTypingIndicator();
