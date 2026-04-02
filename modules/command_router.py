@@ -745,11 +745,30 @@ class CommandRouter:
 
     def _try_screenshot_commands(self, cmd: str) -> Optional[Dict[str, Any]]:
         """Try screenshot commands."""
+        # Snipping Tool - Open Windows Snipping Tool
+        if any(kw in cmd for kw in ["snipping tool", "snip", "snip tool", "snipping"]):
+            result = self.screenshot_tool.take_screenshot_snipping_tool()
+            return {
+                "success": True,
+                "response": "Opening Snipping Tool. Take your screenshot!",
+                "action": "snipping_tool"
+            }
+        
+        # Regular Screenshot - Auto capture and save
         if any(kw in cmd for kw in ["screenshot", "screen capture", "capture screen", "take picture"]):
             result = self.screenshot_tool.take_screenshot()
+            if result.get("success"):
+                filepath = result.get("path", "")
+                filename = result.get("filename", "")
+                return {
+                    "success": True,
+                    "response": f"Screenshot taken and saved to Pictures folder: {filename}",
+                    "action": "screenshot",
+                    "path": filepath
+                }
             return {
-                "success": result.get("success", False),
-                "response": "Screenshot taken",
+                "success": False,
+                "response": "Screenshot failed",
                 "action": "screenshot"
             }
 

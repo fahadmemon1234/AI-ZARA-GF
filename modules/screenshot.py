@@ -20,14 +20,13 @@ class ScreenshotTool:
 
     def __init__(self):
         """Initialize screenshot tool."""
-        # Default screenshot directory
+        # Default screenshot directory - Save in project folder
         self.screenshot_dir = os.path.join(
-            os.path.expanduser("~"),
-            "Pictures",
-            "ARIA Screenshots"
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "Screenshot"
         )
         os.makedirs(self.screenshot_dir, exist_ok=True)
-        
+
         # Screen reader state
         self.screen_reader_active = False
         self.screen_reader_thread = None
@@ -48,33 +47,61 @@ class ScreenshotTool:
 
     def take_screenshot(self, save_path: str = None) -> Dict[str, Any]:
         """
-        Take a full screen screenshot.
-        
+        Take a full screen screenshot using PIL/Pillow.
+
         Args:
             save_path: Custom save path (default: auto-generated in screenshot_dir)
-            
+
         Returns:
             Status dictionary with screenshot path
         """
         try:
             # Generate filepath
             filepath = self._get_filepath(save_path) if save_path else self._get_filepath()
-            
-            # Take screenshot
+
+            # Take screenshot using PIL
             screenshot = ImageGrab.grab()
-            
+
             # Save
             screenshot.save(filepath, 'PNG')
-            
+
             return {
                 "success": True,
-                "message": "Screenshot taken",
+                "message": "Screenshot taken and saved",
                 "path": filepath,
                 "filename": os.path.basename(filepath),
                 "size": screenshot.size,
                 "action": "take_screenshot"
             }
-            
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def take_screenshot_snipping_tool(self, save_path: str = None) -> Dict[str, Any]:
+        """
+        Open Windows Snipping Tool for screenshot.
+
+        Args:
+            save_path: Custom save path
+
+        Returns:
+            Status dictionary
+        """
+        try:
+            # Generate filepath
+            filepath = self._get_filepath(save_path) if save_path else self._get_filepath()
+
+            # Open Snipping Tool
+            import subprocess
+            subprocess.startfile("snippingtool.exe")
+
+            return {
+                "success": True,
+                "message": "Snipping Tool opened. Take your screenshot and save it!",
+                "path": filepath,
+                "action": "snipping_tool"
+            }
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 

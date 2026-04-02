@@ -109,10 +109,10 @@ APP_PATHS = {
 
 # ============== Data Paths ==============
 
-# Base directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Base directory - Use absolute path to project folder
+BASE_DIR = r"D:\Fahad Project\AI-Driven\zara-ai"
 
-# Data directory for persistent storage
+# Data directory for persistent storage - Save in project folder
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # Memory files
