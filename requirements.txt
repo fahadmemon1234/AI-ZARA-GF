@@ -1,0 +1,60 @@
+# ARIA - Advanced Real-time Intelligent Assistant
+# Python Dependencies - Complete List
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-dotenv==1.0.0
+
+# AI & NLP - Multiple Providers
+anthropic==0.18.0                    # Anthropic Claude
+google-generativeai>=0.3.0           # Google Gemini
+openai>=1.0.0                        # OpenAI GPT
+groq>=0.5.0                          # Groq (FAST + FREE!)
+
+# AI Memory Layer
+mem0ai>=0.1.0                        # Mem0 memory for AI
+
+# Real-time Communication
+livekit>=0.10.0                      # LiveKit audio/video
+livekit-api>=0.5.0                   # LiveKit API
+
+# Voice & Speech
+SpeechRecognition==3.10.1
+pyttsx3==2.90
+pyaudio==0.2.14
+comtypes==1.4.1
+
+# ElevenLabs Voice Generation (Better TTS)
+# (uses requests, already included)
+
+# System Control
+psutil==5.9.7
+pyautogui==0.9.54
+screen-brightness-control==0.5.0
+pycaw==20240210
+
+# Automation
+pywhatkit==5.4
+pyperclip==1.8.2
+pygetwindow==0.0.9
+keyboard==0.13.5
+mouse==0.7.1
+pywin32==306
+
+# Image Processing
+pillow==10.2.0
+pytesseract==0.3.10
+
+# PDF Tools
+PyPDF2==3.0.1
+fpdf2==2.7.7
+
+# Web & API
+requests==2.31.0
+beautifulsoup4==4.12.3
+newsapi-python==0.2.7
+
+# Utilities
+aiofiles==23.2.1
+python-multipart==0.0.6
