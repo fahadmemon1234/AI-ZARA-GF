@@ -1,0 +1,37 @@
+# ZARA - Vercel Deployment Requirements
+# Windows-specific dependencies removed for Linux compatibility
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-dotenv==1.0.0
+
+# AI & NLP - Multiple Providers
+anthropic==0.18.0                    # Anthropic Claude
+google-generativeai>=0.3.0           # Google Gemini
+openai>=1.0.0                        # OpenAI GPT
+groq>=0.5.0                          # Groq (FAST + FREE!)
+
+# AI Memory Layer
+mem0ai>=0.1.0                        # Mem0 memory for AI
+
+# Real-time Communication
+livekit>=0.10.0                      # LiveKit audio/video
+livekit-api>=0.5.0                   # LiveKit API
+
+# Web & API
+requests==2.31.0
+beautifulsoup4==4.12.3
+newsapi-python==0.2.7
+
+# Image Processing
+pillow==10.2.0
+pytesseract==0.3.10
+
+# PDF Tools
+PyPDF2==3.0.1
+fpdf2==2.7.7
+
+# Utilities
+aiofiles==23.2.1
+python-multipart==0.0.6

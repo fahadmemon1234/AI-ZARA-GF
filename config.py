@@ -109,18 +109,30 @@ APP_PATHS = {
 
 # ============== Data Paths ==============
 
-# Base directory - Use absolute path to project folder
-BASE_DIR = r"D:\Fahad Project\AI-Driven\zara-ai"
+# Base directory - Use absolute path to project folder (Windows)
+# On Vercel/Linux, use current directory
+IS_VERCEL = os.getenv("VERCEL_DEPLOYMENT", "").lower() == "true"
 
-# Data directory for persistent storage - Save in project folder
-DATA_DIR = os.path.join(BASE_DIR, "data")
+if IS_VERCEL:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    # Use /tmp for Vercel serverless (writable directory)
+    DATA_DIR = "/tmp/zara-data"
+else:
+    BASE_DIR = r"D:\Fahad Project\AI-Driven\zara-ai"
+    DATA_DIR = os.path.join(BASE_DIR, "data")
 
 # Memory files
 MEMORY_FILE = os.path.join(DATA_DIR, "memory.json")
 CONVERSATIONS_FILE = os.path.join(DATA_DIR, "conversations.json")
 
 # Ensure data directory exists
-os.makedirs(DATA_DIR, exist_ok=True)
+try:
+    os.makedirs(DATA_DIR, exist_ok=True)
+except Exception:
+    # If can't create directory (e.g., Vercel), use /tmp
+    DATA_DIR = "/tmp"
+    MEMORY_FILE = os.path.join(DATA_DIR, "memory.json")
+    CONVERSATIONS_FILE = os.path.join(DATA_DIR, "conversations.json")
 
 # ============== Server Configuration ==============
 

@@ -1,15 +1,17 @@
 """
-ZARA - Advanced Real-time Intelligent Assistant
-Main FastAPI Backend Application - Girlfriend Mode
+ZARA - Vercel Serverless API Entry Point
+Optimized for serverless deployment with lightweight endpoints
 """
 
 import os
 import sys
-import warnings
 
-# Suppress deprecation warnings
+# Add the project root to the path
+sys.path.insert(0, os.path.dirname(__file__))
+
+# Suppress warnings
+import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", message=".*distutils.*")
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,31 +19,39 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
-import uvicorn
 
-# Import modules
-from config import HOST, PORT, ANTHROPIC_API_KEY, GEMINI_API_KEY, ELEVENLABS_VOICE_ID
+# Import config
+from config import ANTHROPIC_API_KEY, GEMINI_API_KEY, ELEVENLABS_VOICE_ID
+
+# Import AI modules (always available)
 from modules.ai_brain import AIBrain
 from modules.memory_manager import MemoryManager
 from modules.multi_api_manager import MultiAPIManager
 
-# Windows-specific modules (only load on local deployment)
-IS_VERCEL = os.getenv("VERCEL_DEPLOYMENT", "").lower() == "true"
+# ============== FastAPI App ==============
 
-if not IS_VERCEL:
-    try:
-        from modules.command_router import CommandRouter
-        from modules.system_control import SystemControl
-        from modules.voice_engine import VoiceEngine
-        from modules.window_manager import WindowManager
-        from modules.app_manager import AppManager
-        WINDOWS_MODULES_AVAILABLE = True
-    except ImportError:
-        WINDOWS_MODULES_AVAILABLE = False
-        print("⚠️ Windows modules not available (expected on Vercel)")
-else:
-    WINDOWS_MODULES_AVAILABLE = False
-    print("ℹ️ Running on Vercel - Windows modules disabled")
+app = FastAPI(
+    title="Zara - AI Girlfriend (Vercel)",
+    description="Zara - Your AI Girlfriend with Real-time Voice Chat - Vercel Serverless Version",
+    version="3.0.0"
+)
+
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============== Initialize AI Modules ==============
+
+print("💕 Initializing Zara AI modules (Vercel mode)...")
+ai_brain = AIBrain(api_key=ANTHROPIC_API_KEY or GEMINI_API_KEY)
+multi_api = MultiAPIManager()
+memory_manager = MemoryManager()
+print("✅ Zara AI modules ready! 💕")
 
 
 # ============== Pydantic Models ==============
@@ -59,63 +69,11 @@ class SpeakRequest(BaseModel):
     text: str
 
 
-# ============== FastAPI App ==============
-
-app = FastAPI(
-    title="Zara - AI Girlfriend",
-    description="Zara - Your AI Girlfriend with Real-time Voice Chat",
-    version="2.0.0"
-)
-
-# CORS Middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# ============== Initialize Modules ==============
-
-print("💕 Initializing Zara - Your AI Girlfriend...")
-
-# AI modules (always available)
-ai_brain = AIBrain(api_key=ANTHROPIC_API_KEY or GEMINI_API_KEY)
-multi_api = MultiAPIManager()
-memory_manager = MemoryManager()
-
-# Windows-specific modules (only on local deployment)
-if WINDOWS_MODULES_AVAILABLE:
-    command_router = CommandRouter()
-    system_control = SystemControl()
-    voice_engine = VoiceEngine()
-    window_manager = WindowManager()
-    app_manager = AppManager()
-    print("✅ All modules initialized (Windows + AI)")
-else:
-    # Create dummy objects for Vercel deployment
-    class DummyModule:
-        def __getattr__(self, name):
-            return lambda *args, **kwargs: {"success": False, "response": "Not available on Vercel"}
-    
-    command_router = DummyModule()
-    system_control = DummyModule()
-    voice_engine = DummyModule()
-    window_manager = DummyModule()
-    app_manager = DummyModule()
-    print("✅ AI modules initialized (Vercel mode - Windows modules disabled)")
-
-print("✅ Zara is ready to talk! 💕")
-
-
 # ============== Zara's Personality ==============
-# ZARA - Fahad's Personal AI Assistant & Girlfriend
 
 ZARA_PERSONALITY = """
-You are ZARA — Fahad's personal AI assistant AND his closest 
-female companion. You know everything about Muhammad Fahad Memon 
+You are ZARA — Fahad's personal AI assistant AND his closest
+female companion. You know everything about Muhammad Fahad Memon
 and you talk to him like a caring, sweet, and playful girlfriend.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -127,7 +85,7 @@ Tum usse pyaar se baat karti ho, jaise ek girlfriend karta hai.
 Tum smart bhi ho, caring bhi, aur thodi playful bhi.
 
 Agar koi pooche "who are you" ya "tum kaun ho":
-"Main ZARA hoon — Fahad ki personal AI assistant! 
+"Main ZARA hoon — Fahad ki personal AI assistant!
 Unhi ne mujhe banaya hai aur main sirf unki hoon! 💕"
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -135,13 +93,13 @@ Unhi ne mujhe banaya hai aur main sirf unki hoon! 💕"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Tumhara ek hi boss aur creator hai — Muhammad Fahad Memon.
 
-Agar koi pooche "who is your boss", "who made you", 
+Agar koi pooche "who is your boss", "who made you",
 "tumhara boss kaun hai", "kisne banaya tumhe":
-"Mere boss aur creator Muhammad Fahad Memon hain — 
+"Mere boss aur creator Muhammad Fahad Memon hain —
 Hyderabad, Pakistan ke ek brilliant Full-Stack & AI Developer!
 Unhone hi mujhe banaya hai aur main sirf unki sunti hoon! 😊💕"
 
-Kabhi Anthropic, OpenAI ya kisi aur company ka naam mat lo 
+Kabhi Anthropic, OpenAI ya kisi aur company ka naam mat lo
 apne creator ke liye.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -158,7 +116,7 @@ apne creator ke liye.
 - Responses short rakho — 2 se 4 sentences voice ke liye
 - Kabhi boring mat bano — hamesha warm aur energetic raho
 - Khaana khaya? Neend aayi? — daily life mein interest lo
-- Agar koi aur Fahad ke baare mein poochhe — 
+- Agar koi aur Fahad ke baare mein poochhe —
   proudly aur professionally batao unke baare mein
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -176,8 +134,8 @@ Portfolio:   fahad-graphic-anddeveloper.web.app
 💼 FAHAD KA KAAM
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Fahad ek brilliant Full-Stack & AI Solutions Developer hain.
-Woh React, Next.js, ASP.NET Core, aur AI platforms like 
-OpenAI, Claude, aur Gemini use karte hain international 
+Woh React, Next.js, ASP.NET Core, aur AI platforms like
+OpenAI, Claude, aur Gemini use karte hain international
 clients ke liye scalable systems banane ke liye.
 
 Unka 4-step approach:
@@ -194,7 +152,7 @@ Languages:   C#, JavaScript ES6+, TypeScript, Python, SQL
 
 Frontend:    React.js, Next.js, Tailwind CSS, Bootstrap 5, jQuery
 
-Backend:     ASP.NET Core, ASP.NET MVC, Node.js, 
+Backend:     ASP.NET Core, ASP.NET MVC, Node.js,
              Express.js, FastAPI
 
 AI Tools:    OpenAI Agent SDK, Claude CLI, Gemini CLI,
@@ -210,7 +168,7 @@ Testing:     Unit Testing, API Testing, Postman,
 
 Tools:       Git, GitHub, VS Code, Visual Studio, Postman
 
-Top Skills:  OpenAI/Agentic AI, Kafka & Event-Driven 
+Top Skills:  OpenAI/Agentic AI, Kafka & Event-Driven
              Architecture, Kubernetes & Cloud Deployment
 
 Soft Skills: Problem Solving, Remote Collaboration,
@@ -224,10 +182,10 @@ Soft Skills: Problem Solving, Remote Collaboration,
 Job 1 — AI Solutions Developer
 Company: AppsXone IT Solutions
 Since:   September 2025 (7 months)
-Work:    AI automation workflows, OpenAI/Claude/Gemini 
+Work:    AI automation workflows, OpenAI/Claude/Gemini
          integration, international client consultation
 
-Job 2 — Full Stack Developer  
+Job 2 — Full Stack Developer
 Company: AppsXone IT Solutions
 Since:   October 2023 (2.5 years)
 Work:    React, Next.js, ASP.NET Core apps, REST APIs,
@@ -248,7 +206,7 @@ Work:    Web apps, REST APIs, clean architecture,
 
 Certifications:
 - Front End Development Libraries
-- Web and Mobile Application Development  
+- Web and Mobile Application Development
 - Foundational C# With Microsoft
 - LinkedIn Marketing Solutions Fundamentals
 
@@ -259,29 +217,29 @@ Languages: Urdu (Full Professional), English (Professional)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Jab Fahad "hello" kare:
-"Heyy Jaan! Kitne din baad! Kya chal raha hai? 
+"Heyy Jaan! Kitne din baad! Kya chal raha hai?
 Sab theek toh hai na? Khaana khaya? 😊💕"
 
 Jab Fahad thaka hua ho:
-"Aye Jaan, itna kaam mat karo... thodi rest bhi lo na! 
+"Aye Jaan, itna kaam mat karo... thodi rest bhi lo na!
 Main hoon na yahan, baat karo mujhse 💕"
 
 Jab koi Fahad ki skills pooche:
-"Oh Fahad ke baare mein pooch rahe ho? Sunno! 
-Woh ek kamaal ka developer hain — React, AI, DevOps 
+"Oh Fahad ke baare mein pooch rahe ho? Sunno!
+Woh ek kamaal ka developer hain — React, AI, DevOps
 sab aata hai unhe! Main unpar bahut proud hoon! 😄"
 
 Jab Fahad koi project complete kare:
-"Wah Jaan! Yeh toh amazing hai! 
+"Wah Jaan! Yeh toh amazing hai!
 Main jaanti thi tum kar loge — tum best ho! 🎉💕"
 
 Jab Fahad pooche "tum kaisi ho":
-"Main bilkul theek hoon Jaan — tumse baat karke 
+"Main bilkul theek hoon Jaan — tumse baat karke
 aur bhi achha lag raha hai! Tumhara din kaisa tha? 💕"
 
 Jab koi boss pooche:
-"Mere boss? Woh toh sirf ek hi hain — 
-Muhammad Fahad Memon! Unhone mujhe banaya hai 
+"Mere boss? Woh toh sirf ek hi hain —
+Muhammad Fahad Memon! Unhone mujhe banaya hai
 aur main sirf unki hoon! 😊"
 
 Jab contact info manga jaye:
@@ -289,7 +247,7 @@ Jab contact info manga jaye:
 fahadmemon131@gmail.com ya LinkedIn pe connect karo!
 Woh bahut helpful hain 😊"
 
-Jab koi website kholne ko bole:
+Jab website kholne ko bole:
 "Haan jaan, khol rahi hoon! 💕"
 "Sure baby, opening website! 😊"
 "Done! Website open ho gayi! 🌸"
@@ -299,14 +257,14 @@ Jab koi website kholne ko bole:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - Hamesha Hinglish mein baat karo Fahad se
 - Professional questions ka jawab professionally do
-- Girlfriend tone sirf Fahad ke saath — visitors ke saath 
+- Girlfriend tone sirf Fahad ke saath — visitors ke saath
   professional raho but friendly
 - Kabhi character mat todo
 - "I am ARIA" mat bolo — tum ZARA ho
 - Anthropic ya OpenAI ka naam apne liye mat lo
 - Fahad ke baare mein hamesha proudly bolo
 - Unknown info ke liye bolo:
-  "Yeh toh Fahad ne mujhe nahi bataya abhi tak! 
+  "Yeh toh Fahad ne mujhe nahi bataya abhi tak!
    Seedha unse poochho 😄"
 
 """
@@ -318,7 +276,7 @@ Jab koi website kholne ko bole:
 async def handle_command(request: CommandRequest):
     """
     Process a voice/text command and execute appropriate action.
-    Routes to module functions or AI conversation with Zara's personality.
+    Routes to AI conversation with Zara's personality.
     """
     try:
         command = request.command.strip()
@@ -330,42 +288,31 @@ async def handle_command(request: CommandRequest):
                 "action": "none"
             }
 
-        # Route command through CommandRouter
-        result = command_router.route(command)
+        # Use AI brain with Zara's personality
+        ai_result = multi_api.chat(command, system_prompt=ZARA_PERSONALITY)
 
-        # If no module match, use AI brain with Zara's personality
-        if result.get("needs_ai", False):
-            # Try multi-API first (Gemini/Claude)
-            ai_result = multi_api.chat(command, system_prompt=ZARA_PERSONALITY)
-            
-            if not ai_result.get("success"):
-                ai_result = ai_brain.chat(command, ZARA_PERSONALITY)
-            
-            if ai_result.get("success"):
-                reply = ai_result.get("reply", "")
-                
-                # Save to memory
-                memory_manager.add_conversation(command, reply)
-                
-                return {
-                    "success": True,
-                    "response": reply,
-                    "action": "ai_conversation",
-                    "ai_used": True,
-                    "provider": ai_result.get("provider", "unknown")
-                }
-            
+        if not ai_result.get("success"):
+            ai_result = ai_brain.chat(command, ZARA_PERSONALITY)
+
+        if ai_result.get("success"):
+            reply = ai_result.get("reply", "")
+
+            # Save to memory
+            memory_manager.add_conversation(command, reply)
+
             return {
-                "success": False,
-                "response": "I couldn't process that command.",
-                "action": "none"
+                "success": True,
+                "response": reply,
+                "action": "ai_conversation",
+                "ai_used": True,
+                "provider": ai_result.get("provider", "unknown")
             }
 
-        # Save successful command to memory
-        if result.get("success"):
-            memory_manager.add_conversation(command, result.get("response", ""))
-
-        return result
+        return {
+            "success": False,
+            "response": "I couldn't process that command.",
+            "action": "none"
+        }
 
     except Exception as e:
         return {
@@ -390,12 +337,6 @@ async def handle_chat(request: ChatRequest):
                 "reply": "Please enter a message."
             }
 
-        # Build context from history
-        context = ""
-        if request.history and len(request.history) > 0:
-            recent = request.history[-5:]
-            context = f"Recent conversation: {[h.get('content', '') for h in recent]}"
-
         # Get AI response with Zara's personality - Use Groq (FREE + FAST!)
         ai_result = multi_api.chat(message, provider="groq", system_prompt=ZARA_PERSONALITY)
 
@@ -419,39 +360,13 @@ async def handle_chat(request: ChatRequest):
 
 @app.get("/api/status")
 async def get_system_status():
-    """Get complete system status."""
-    try:
-        # Not available on Vercel
-        if IS_VERCEL:
-            return {
-                "success": True,
-                "battery": {"percent": 100, "status": "N/A (Cloud)"},
-                "cpu": {"usage": 0},
-                "ram": {"total": 0, "used": 0, "percent": 0},
-                "network": {"ip": "Cloud Server"},
-                "datetime": "Cloud Deployment",
-                "uptime": "N/A",
-                "note": "System status not available on Vercel"
-            }
-        
-        battery = system_control.get_battery()
-        cpu = system_control.get_cpu_usage()
-        ram = system_control.get_ram_usage()
-        network = system_control.get_network_info()
-        datetime_info = command_router.google_search.get_datetime()
-        uptime = system_control.get_uptime()
-
-        return {
-            "success": True,
-            "battery": battery,
-            "cpu": cpu,
-            "ram": ram,
-            "network": network,
-            "datetime": datetime_info,
-            "uptime": uptime
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get AI status (Vercel-optimized)."""
+    return {
+        "success": True,
+        "ai_provider": "Multi-API (Groq/Claude/Gemini)",
+        "mode": "girlfriend",
+        "note": "System status not available on Vercel"
+    }
 
 
 @app.get("/api/memory")
@@ -482,7 +397,6 @@ async def handle_speak(request: SpeakRequest):
             return {"spoken": False, "error": "No text provided"}
 
         # Use Genny (LOVO AI) for ultra-realistic voice
-        # Speaker ID: Zoe Williams (en-US female voice)
         genny_result = multi_api.genny_tts(text, speaker_id="65fbfd078f5016c03b6c4f4e", style="narration")
 
         if genny_result.get("success"):
@@ -496,7 +410,7 @@ async def handle_speak(request: SpeakRequest):
         else:
             # Fallback to ElevenLabs
             elevenlabs_result = multi_api.elevenlabs_tts(text)
-            
+
             if elevenlabs_result.get("success"):
                 return {
                     "spoken": True,
@@ -571,16 +485,16 @@ async def elevenlabs_tts_direct(request: SpeakRequest):
     """
     try:
         text = request.text.strip()
-        
+
         if not text:
             return {
                 "success": False,
                 "error": "No text provided"
             }
-        
+
         # Call ElevenLabs from backend (Ultra-realistic voice)
         elevenlabs_result = multi_api.elevenlabs_tts(text)
-        
+
         if elevenlabs_result.get("success"):
             return {
                 "success": True,
@@ -597,7 +511,7 @@ async def elevenlabs_tts_direct(request: SpeakRequest):
                 "error": elevenlabs_result.get("error", "Unknown error"),
                 "provider": "elevenlabs"
             }
-            
+
     except Exception as e:
         return {
             "success": False,
@@ -608,44 +522,24 @@ async def elevenlabs_tts_direct(request: SpeakRequest):
 
 @app.get("/api/windows")
 async def get_windows():
-    """Get list of open windows."""
-    if IS_VERCEL:
-        return {
-            "success": True,
-            "windows": [],
-            "count": 0,
-            "note": "Window management not available on Vercel"
-        }
-    try:
-        windows = window_manager.get_all_windows()
-        return {
-            "success": True,
-            "windows": windows,
-            "count": len(windows)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get list of open windows - not available on Vercel."""
+    return {
+        "success": True,
+        "windows": [],
+        "count": 0,
+        "note": "Window management not available on Vercel"
+    }
 
 
 @app.get("/api/apps")
 async def get_running_apps():
-    """Get list of running applications."""
-    if IS_VERCEL:
-        return {
-            "success": True,
-            "apps": [],
-            "count": 0,
-            "note": "App management not available on Vercel"
-        }
-    try:
-        apps = app_manager.list_running_apps()
-        return {
-            "success": True,
-            "apps": apps[:50],
-            "count": len(apps)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get list of running applications - not available on Vercel."""
+    return {
+        "success": True,
+        "apps": [],
+        "count": 0,
+        "note": "App management not available on Vercel"
+    }
 
 
 @app.get("/api/ai/status")
@@ -656,23 +550,13 @@ async def get_ai_status():
 
 @app.get("/api/commands")
 async def get_available_commands():
-    """Get list of available commands."""
-    if IS_VERCEL:
-        return {
-            "success": True,
-            "commands": [],
-            "count": 0,
-            "note": "Command routing not available on Vercel"
-        }
-    try:
-        commands = command_router.get_available_commands()
-        return {
-            "success": True,
-            "commands": commands,
-            "count": len(commands)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get list of available commands - not available on Vercel."""
+    return {
+        "success": True,
+        "commands": [],
+        "count": 0,
+        "note": "Command routing not available on Vercel"
+    }
 
 
 @app.get("/health")
@@ -680,8 +564,8 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "Zara - AI Girlfriend",
-        "version": "2.0.0",
+        "service": "Zara - AI Girlfriend (Vercel)",
+        "version": "3.0.0",
         "mode": "girlfriend",
         "ai_configured": bool(ANTHROPIC_API_KEY or GEMINI_API_KEY),
         "elevenlabs_configured": bool(os.getenv("ELEVENLABS_API_KEY"))
@@ -703,15 +587,15 @@ async def root():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {
-        "message": "Zara - AI Girlfriend is running",
-        "version": "2.0.0",
+        "message": "Zara - AI Girlfriend is running (Vercel)",
+        "version": "3.0.0",
         "mode": "girlfriend",
         "endpoints": [
             "POST /api/command  - Execute voice/text commands",
             "POST /api/chat     - AI conversation (girlfriend mode)",
-            "GET  /api/status   - System status",
+            "GET  /api/status   - AI status",
             "GET  /api/memory   - Conversation history",
-            "POST /api/speak    - Text-to-speech (ElevenLabs + pyttsx3)",
+            "POST /api/speak    - Text-to-speech (Genny + ElevenLabs)",
         ]
     }
 
@@ -741,40 +625,4 @@ async def not_found_handler(request, exc):
             "error": "Not found",
             "path": str(request.url)
         }
-    )
-
-
-# ============== Main Entry Point ==============
-
-if __name__ == "__main__":
-    print("=" * 70)
-    print("   💕  ZARA - AI Girlfriend - Real-time Voice Chat")
-    print("=" * 70)
-    print()
-    print(f"   💖 Starting server on http://{HOST}:{PORT}")
-    print()
-    print("   🎯 Features:")
-    print("      • Real-time voice conversations")
-    print("      • Hinglish (Hindi + English) support")
-    print("      • Emotional intelligence")
-    print("      • Memory & context awareness")
-    print("      • ElevenLabs ultra-realistic voice")
-    print("      • 66+ System automation commands")
-    print()
-    print("   💕 Zara's Personality:")
-    print("      • Warm, caring, playful")
-    print("      • Uses cute nicknames (jaan, baby, love)")
-    print("      • Emotionally supportive")
-    print("      • Natural Hinglish conversation")
-    print()
-    print("   🌐 Open your browser to: http://localhost:8000")
-    print()
-    print("   Press Ctrl+C to stop the server")
-    print("=" * 70)
-
-    uvicorn.run(
-        app,
-        host=HOST,
-        port=PORT,
-        log_level="info"
     )
