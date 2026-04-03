@@ -1,1 +1,17 @@
-"[{\"test\": \"data\"}]"  
+[
+  {
+    "user": "Volume badha do",
+    "assistant": "Volume increased to 50%",
+    "timestamp": "2026-04-03T11:07:24.355622"
+  },
+  {
+    "user": "Screenshot le lo",
+    "assistant": "Screenshot taken and saved to Pictures folder: screenshot_20260403_110835.png",
+    "timestamp": "2026-04-03T11:08:35.580804"
+  },
+  {
+    "user": "Volume badha do",
+    "assistant": "Volume increased to 50%",
+    "timestamp": "2026-04-03T11:08:36.054180"
+  }
+]

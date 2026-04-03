@@ -291,38 +291,38 @@ class MemoryManager:
     def add_conversation(self, user_msg: str, ai_reply: str) -> Dict[str, Any]:
         """
         Add a conversation turn.
-        
+
         Args:
             user_msg: User's message
             ai_reply: AI's response
-            
+
         Returns:
             Status dictionary
         """
         try:
             conversations = self._load_json(self.conversations_file)
-            
+
             # Add new conversation
             conversation = {
                 "user": user_msg,
                 "assistant": ai_reply,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
             conversations.append(conversation)
-            
+
             # Keep only last 50 conversations
             if len(conversations) > 50:
                 conversations = conversations[-50:]
-            
+
             self._save_json(self.conversations_file, conversations)
-            
+
             return {
                 "success": True,
                 "message": "Conversation saved",
                 "total_conversations": len(conversations)
             }
-            
+
         except Exception as e:
             return {"success": False, "error": str(e)}
 
