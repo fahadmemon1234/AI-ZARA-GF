@@ -2,7 +2,7 @@
 
 **An advanced AI voice assistant with ultra-realistic human-like voice, pink girly theme, and automatic voice chat capabilities.**
 
-![Version](https://img.shields.io/badge/version-2.0.0-pink)
+![Version](https://img.shields.io/badge/version-3.0.0-pink)
 ![Python](https://img.shields.io/badge/python-3.8+-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -11,11 +11,11 @@
 ## ✨ Features
 
 ### 🎤 Ultra-Realistic Voice
-- **Voice Model:** ElevenLabs Bella (Most realistic female voice)
+- **Voice Model:** ElevenLabs (Most realistic female voices)
 - **Technology:** `eleven_flash_v2_5` - Latest & most advanced
 - **Quality:** Human-like with natural breathing, pauses & emotions
 - **Auto-Speak:** Every response is spoken automatically
-- **Language:** English only
+- **Language:** English & Hinglish (Hindi + English mix)
 
 ### 💕 Girlfriend Personality
 - Warm, caring & emotionally supportive
@@ -50,6 +50,14 @@
 - **Memory:** Remembers conversations
 - **Auto-Greeting:** Greets you on page load
 
+### 🚀 Multi-API Support
+- **Anthropic Claude** - Primary AI (Sonnet 4)
+- **Google Gemini** - Backup AI
+- **OpenAI GPT** - Additional AI option
+- **ElevenLabs** - Premium voice generation
+- **LiveKit** - Real-time audio communication
+- **Mem0** - AI memory layer
+
 ---
 
 ## 🚀 Quick Start
@@ -77,21 +85,35 @@ pip install -r requirements.txt
 Edit `.env` file and add your API keys:
 
 ```env
+# Anthropic (REQUIRED - for AI chat - Claude)
+ANTHROPIC_API_KEY=sk_your_key_here
+
 # ElevenLabs (REQUIRED - for ultra-realistic voice)
 ELEVENLABS_API_KEY=sk_your_key_here
-ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL  # Bella voice
-
-# Groq (FREE - for AI chat)
-GROQ_API_KEY=gsk_your_key_here
+ELEVENLABS_VOICE_ID=RmT0JE37YE1NfodnZBnw
 
 # Google Gemini (FREE - backup AI)
 GEMINI_API_KEY=your_key_here
+
+# OpenAI (OPTIONAL - GPT models)
+OPENAI_API_KEY=your_key_here
+
+# LiveKit (OPTIONAL - real-time audio)
+LIVEKIT_API_KEY=your_key_here
+LIVEKIT_API_SECRET=your_secret_here
+LIVEKIT_URL=wss://your-project.livekit.cloud
+
+# Mem0 (OPTIONAL - AI memory)
+MEM0_API_KEY=your_key_here
 ```
 
 **Get FREE API Keys:**
+- **Anthropic:** https://console.anthropic.com (~100 requests/day FREE)
 - **ElevenLabs:** https://elevenlabs.io/app/settings/api-keys (10k chars/month FREE)
-- **Groq:** https://console.groq.com (Unlimited FREE)
-- **Gemini:** https://aistudio.google.com/app/apikey (1,500/day FREE)
+- **Google Gemini:** https://makersuite.google.com/app/apikey (60 req/min FREE)
+- **OpenAI:** https://platform.openai.com/api-keys ($5 free credit)
+- **LiveKit:** https://cloud.livekit.io (Free tier available)
+- **Mem0:** https://app.mem0.ai (Free tier available)
 
 **4. Start Server**
 ```bash
@@ -107,7 +129,7 @@ http://localhost:8000
 - Click 🎤 mic button and speak
 - Or type in the input box
 - Or click quick action buttons
-- Zara will reply with ultra-realistic voice!
+- ZARA will reply with ultra-realistic voice!
 
 ---
 
@@ -117,12 +139,12 @@ http://localhost:8000
 1. Click **🎤 Mic Button**
 2. **Speak** your message
 3. **Auto-sends** after you finish
-4. **Zara replies** with voice automatically
+4. **ZARA replies** with voice automatically
 
 ### Text Chat
 1. **Type** in the input box
 2. **Press Enter** or click **Send**
-3. **Zara replies** with voice
+3. **ZARA replies** with voice
 
 ### Quick Actions
 Just **click** any preset button:
@@ -153,7 +175,7 @@ Say or type:
 ### Conversation
 | Command | Response |
 |---------|----------|
-| "Hey Zara" | Warm greeting |
+| "Hey ZARA" | Warm greeting |
 | "I love you" | Love confession |
 | "I'm tired" | Comfort & care |
 | "Tell me a joke" | Funny joke |
@@ -200,7 +222,7 @@ Edit `public/index.html`:
 ### Current Configuration
 ```python
 Model: eleven_flash_v2_5  # Most realistic
-Voice: Bella              # Ultra-realistic female
+Voice: Configurable       # Multiple voice options
 Stability: 0.35           # More expressive
 Similarity: 0.85          # Faithful to voice
 Style: 0.50              # Natural speech patterns
@@ -211,7 +233,8 @@ Speaker Boost: Enabled    # Enhanced clarity
 Edit `.env`:
 ```env
 # Available Voices:
-ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL  # Bella (Current)
+ELEVENLABS_VOICE_ID=RmT0JE37YE1NfodnZBnw  # Default
+ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL  # Bella
 ELEVENLABS_VOICE_ID=pNInz5obgJUvV3kV6PdQ  # Sarah
 ELEVENLABS_VOICE_ID=jBpfuIE2acCO8z3wKNLl  # Domi
 ```
@@ -230,13 +253,19 @@ zara-ai/
 ├── .gitignore                # Git ignore rules
 ├── README.md                  # This file
 ├── FEATURES_GUIDE.md         # Complete feature guide
+├── API_SETUP.md              # Complete API setup guide
+├── API_INTEGRATION_SUMMARY.md # API integration details
 ├── modules/                   # All modules
 │   ├── __init__.py
-│   ├── multi_api_manager.py   # AI API manager
+│   ├── multi_api_manager.py   # Multi-API manager
 │   ├── voice_engine.py        # Voice engine
 │   ├── command_router.py      # Command routing
 │   ├── ai_brain.py           # AI brain (ZARA persona)
-│   └── ... (15 more modules)
+│   ├── memory_manager.py      # Memory management
+│   ├── system_control.py      # System automation
+│   ├── window_manager.py      # Window management
+│   ├── app_manager.py         # App management
+│   └── ... (more modules)
 ├── data/                      # User data (ignored by git)
 │   ├── memory.json
 │   └── conversations.json
@@ -260,7 +289,7 @@ zara-ai/
 3. Check mic is not muted
 4. Check Windows sound settings
 
-### Zara Not Responding
+### ZARA Not Responding
 1. Check server is running (`python main.py`)
 2. Check API keys in `.env`
 3. Check internet connection
@@ -278,10 +307,12 @@ zara-ai/
 
 | Service | Limit | Cost |
 |---------|-------|------|
+| **Anthropic Claude** | ~100 requests/day | FREE |
 | **ElevenLabs** | 10,000 chars/month | FREE |
-| **Groq** | ~30 req/min | FREE |
-| **Google Gemini** | 1,500 req/day | FREE |
-| **LiveKit** | 1,000 min/month | FREE |
+| **Google Gemini** | 60 requests/min | FREE |
+| **OpenAI** | $5 free credit | FREE |
+| **LiveKit** | Free tier available | FREE |
+| **Mem0** | Free tier available | FREE |
 
 ---
 
@@ -303,7 +334,7 @@ zara-ai/
 ```bash
 git init
 git add .
-git commit -m "Initial commit - Zara AI Girlfriend"
+git commit -m "Initial commit - ZARA AI Assistant"
 ```
 
 `.gitignore` already configured to protect your secrets!
@@ -314,7 +345,7 @@ git commit -m "Initial commit - Zara AI Girlfriend"
 
 | Feature | Status |
 |---------|--------|
-| **Ultra-Realistic Voice** | ✅ ElevenLabs Bella |
+| **Ultra-Realistic Voice** | ✅ ElevenLabs |
 | **Auto-Speak** | ✅ Every response |
 | **Voice Input** | ✅ Auto-send after speech |
 | **Text Chat** | ✅ With voice replies |
@@ -326,6 +357,8 @@ git commit -m "Initial commit - Zara AI Girlfriend"
 | **Pink Theme** | ✅ Girly UI |
 | **Responsive** | ✅ All devices |
 | **Waveform** | ✅ 30-bar animation |
+| **Multi-API Support** | ✅ 6 AI APIs |
+| **Hinglish Support** | ✅ Hindi + English |
 
 ---
 
@@ -339,6 +372,7 @@ git commit -m "Initial commit - Zara AI Girlfriend"
 6. **Use voice input** - it's faster than typing
 7. **Customize voice** in `.env` for different voices
 8. **Check FEATURES_GUIDE.md** for complete guide
+9. **Set up multiple APIs** for backup options
 
 ---
 
@@ -350,15 +384,19 @@ If you need help:
 3. Check server is running
 4. Refresh browser page
 5. Read `FEATURES_GUIDE.md` for detailed guide
+6. Read `API_SETUP.md` for API configuration
 
 ---
 
 ## 🎉 Credits
 
 Built with love using:
+- **Anthropic Claude** - Primary AI engine
 - **ElevenLabs** - Ultra-realistic voice synthesis
-- **Groq** - Fast AI responses (Llama 3.3)
 - **Google Gemini** - Backup AI
+- **OpenAI GPT** - Additional AI option
+- **LiveKit** - Real-time audio communication
+- **Mem0** - AI memory layer
 - **FastAPI** - Modern Python web framework
 - **SpeechRecognition** - Voice input
 - **Pyttsx3** - Offline TTS fallback
